@@ -1,40 +1,37 @@
-class CuentaBancaria():
-    ''' Clase que nos permite la gestión de una Cuenta Bancaria genérica!
-    '''
-    
-    def __init__(self, saldo_inicial, nombre, apellido, moneda = '$'):
-        # TODO: Ver la forma de soportar cajas de ahorro y/o cuentas corrientes
-        self.movimientos = []
-        self.saldo = saldo_inicial
-        self.nombre = nombre
-        self.apellido = apellido
-        self.moneda = moneda
+class CuentaBancaria:
+    def __init__(self, titular, saldo):
+        self.titular = titular
+        self.saldo = saldo
 
-    def depositar(self, monto):
-        '''Método que nos permite realizar un depósito bancario'''
-        self.movimientos.append('DEPOSITO: ' + str(monto))
-        self.saldo = self.saldo + monto
+    def depositar(self, cantidad):
+        self.saldo += cantidad
+
+    def retirar(self, cantidad):
+        if cantidad > self.saldo:
+            raise ValueError("Fondos insuficientes")
+        self.saldo -= cantidad
 
 
-    def extraer(self, monto):
-        '''Método que nos permite realizar una extracción de un cuenta bancaria'''
-        if self.saldo - monto >= 0:
-            self.movimientos.append('EXTRACCION: ' + str(monto))
-            self.saldo = self.saldo - monto
-        else:
-           self.movimientos.append('SALDO INSUFICIENTE: ' + str(monto)) 
-           print("Saldo insuficiente")
-        
+class CuentaCorriente(CuentaBancaria):
+    def __init__(self, titular, saldo, limite):
+        super().__init__(titular, saldo)
+        self.limite = limite
 
-    def datos_titular(self):
-        '''Método que nos permite mostrar los datos del titular y su saldo'''
-        return self.apellido + ', ' + self.nombre + " con el saldo: " + str(self.saldo) + " " + self.moneda
-    
-    def datos_saldo(self):
-        return self.saldo
+    def retirar(self, cantidad):
+        if cantidad > self.saldo + self.limite:
+            raise ValueError("Límite de crédito excedido")
+        self.saldo -= cantidad
 
-    def _reset_saldo(self):
-        self.saldo = 0 
 
-    def datos_movimientos(self):
-        return list(self.movimientos) 
+class CajaAhorro(CuentaBancaria):
+    def __init__(self, titular, saldo, tasa_interes):
+        super().__init__(titular, saldo)
+        self.tasa_interes = tasa_interes
+
+    def aplicar_intereses(self):
+        self.saldo += self.saldo * self.tasa_interes
+
+
+class CuentaDolares(CuentaBancaria):
+    def __init__(self, titular, saldo):
+        super().__init__(titular, saldo)
